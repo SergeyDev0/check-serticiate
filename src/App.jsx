@@ -16,7 +16,8 @@ const App = () => {
 
     try {
       const response = await axios.get("http://81.19.135.141/data/certificates.json");
-      const certificates = response;
+      const certificates = response.data;
+			console.log(certificates)
       setCertificatesList(certificates);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
