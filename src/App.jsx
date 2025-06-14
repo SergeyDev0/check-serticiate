@@ -31,16 +31,16 @@ const App = () => {
         let foundCert = null;
         
         if (activeTab === 'number') {
-          foundCert = certificates.find(cert => 
-            cert.code.toLowerCase() === certificate.trim().toLowerCase()
-          );
-        } else {
-          const searchName = name.trim().toLowerCase();
-          foundCert = certificates.find(cert => {
-            const fullName = `${cert.surname} ${cert.name} ${cert.patronymic}`.toLowerCase();
-            return fullName.includes(searchName);
-          });
-        }
+					foundCert = certificates.find(cert => 
+						cert.code.toLowerCase() === certificate.trim().toLowerCase()
+					);
+				} else {
+					const searchName = name.trim().toLowerCase();
+					foundCert = certificates.find(cert => {
+						const fullName = `${cert.surname} ${cert.name} ${cert.patronymic}`.toLowerCase();
+						return fullName === searchName;
+					});
+				}
         
         if (foundCert) {
           setCertificateData({
