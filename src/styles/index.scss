@@ -1,7 +1,7 @@
 // Variables
 $black: #000000;
 $white: #ffffff;
-$light-gray: #f0f0f0;
+$light-gray: #f3f3f3;
 $medium-gray: #e0e0e0;
 $dark-gray: #888;
 $red: #bd0202;
@@ -55,6 +55,10 @@ body {
   color: $black;
   text-align: center;
   text-transform: uppercase;
+}
+
+.form-container {
+  width: 100%;
 }
 
 .certificate-form {
@@ -150,7 +154,6 @@ body {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,28 +162,14 @@ body {
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
-  will-change: transform, box-shadow;
-
-  &:hover:not(.loading) {
-    background-color: $black;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  &:active:not(.loading) {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
 
   &.loading {
     cursor: wait;
-    background-color: $black;
   }
 
   .btn-text {
     position: relative;
     z-index: 1;
-    transition: opacity 0.3s ease;
   }
 
   .spinner {
@@ -216,11 +205,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeInUp 0.5s ease-out forwards;
   font-size: 1.1rem;
-  will-change: transform, opacity;
 
   i {
     font-size: 1.5rem;
@@ -252,15 +237,117 @@ body {
   }
 }
 
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
+// Tabs styles
+.tabs-container {
+  width: 100%;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.tabs {
+  display: flex;
+  position: relative;
+  width: 100%;
+  background: $light-gray;
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  
+  .tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    text-align: center;
+    color: $dark-gray;
+    padding: 12px 8px;
+    transition: all 0.3s ease;
+    z-index: 1;
+    min-width: 0;
+    
+    &.active {
+      color: $black;
+      font-weight: 600;
+    }
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .tab-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem;
   }
+  
+  .tab-indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    background: $white;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+// Certificate details styles
+.certificate-details {
+  width: 100%;
+  background-color: $light-gray;
+  border-radius: 8px;
+  padding: 2rem;
+  
+  .details-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: $black;
+    font-weight: 600;
+  }
+  
+  .detail-rows {
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid $medium-gray;
+      
+      &:last-child {
+        border-bottom: none;
+        margin-bottom: 2rem;
+      }
+    }
+  }
+  
+  .detail-label {
+    font-weight: 500;
+    color: $dark-gray;
+  }
+  
+  .detail-value {
+    font-weight: 500;
+    color: $black;
+    text-align: right;
+  }
+}
+
+// Back button styles
+.back-button {
+  width: 100%;
+  padding: 1rem;
+  background-color: $black;
+  color: $white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1rem;
 }
 
 // Footer styles
@@ -378,6 +465,35 @@ body {
   }
 }
 
+@media (max-width: 430px) {
+  .tabs {
+    .tab {
+      padding: 10px 4px;
+      
+      .tab-text {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .tabs {
+    .tab {
+      padding: 8px 2px;
+      
+      .tab-text {
+        font-size: 0.85rem;
+        letter-spacing: -0.2px;
+      }
+    }
+  }
+  
+  .certificate-details {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 360px) {
   .logo {
     font-size: 1.6rem;
@@ -386,112 +502,14 @@ body {
   .copyright {
     font-size: 0.8rem;
   }
-}
-
-// Tabs styles
-.tabs {
-  display: flex;
-	gap: 1rem;
-  width: 100%;
-  margin-bottom: 1.5rem;
   
-  .tab {
-    flex: 1;
-    background: none;
-    border: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.3s ease;
-    text-align: center;
-    letter-spacing: 0.5px;
-		border: 1px solid $black;
-    color: $black;
-		background-color: $white;
-		border-radius: 999px;
-		padding: 15px;
-		font-size: 16px;
-    
-    &.active {
-			border: 1px solid $black;
-      color: $white;
-			background-color: $black;
+  .tabs {
+    .tab {
+      padding: 8px 1px;
       
-      &:after {
-        transform: scaleX(1);
+      .tab-text {
+        font-size: 0.85rem;
       }
     }
-    
-    &:hover:not(.active) {
-      color: $black;
-    }
-  }
-}
-
-.certificate-details {
-  width: 100%;
-  background-color: $light-gray;
-  border-radius: 8px;
-  padding: 2rem;
-  animation: fadeInUp 0.5s ease-out forwards;
-  
-  .details-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    color: $black;
-    font-weight: 600;
-  }
-  
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid $medium-gray;
-    
-    &:last-child {
-      border-bottom: none;
-      margin-bottom: 2rem;
-    }
-  }
-  
-  .detail-label {
-    font-weight: 500;
-    color: $dark-gray;
-  }
-  
-  .detail-value {
-    font-weight: 600;
-    color: $black;
-    text-align: right;
-  }
-}
-
-.back-button {
-  width: 100%;
-  padding: 1rem;
-  background-color: $black;
-  color: $white;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 1rem;
-  
-  &:hover {
-    background-color: $black;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
 }
