@@ -162,7 +162,7 @@ body {
   will-change: transform, box-shadow;
 
   &:hover:not(.loading) {
-    background-color: lighten($black, 10%);
+    background-color: $black;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
@@ -174,7 +174,7 @@ body {
 
   &.loading {
     cursor: wait;
-    background-color: darken($black, 5%);
+    background-color: $black;
   }
 
   .btn-text {
