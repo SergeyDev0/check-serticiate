@@ -1,1 +1,10 @@
-["ABC123", "DEF456", "XYZ789"]
+[
+	{
+		"code": "ABC123",
+		"date": "12.04.2012",
+		"name": "Seregey",
+		"surname": "Sergeev",
+		"patronymic": "Sergeevich",
+		"qualification": "Programmist" 
+	}
+]
