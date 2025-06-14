@@ -13,54 +13,82 @@ const App = () => {
   const [certificateData, setCertificateData] = useState(null);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-    setIsLoading(true);
-
-    try {
-      const response = await axios.get("http://81.19.135.141/data/certificates.json");
-      const certificates = response.data;
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      if (activeTab === 'number' && !certificate.trim()) {
-        setVerificationResult('empty');
-      } else if (activeTab === 'name' && !name.trim()) {
-        setVerificationResult('empty');
-      } else {
-        let foundCert = null;
-        
-        if (activeTab === 'number') {
-					foundCert = certificates.find(cert => 
-						cert.code.toLowerCase() === certificate.trim().toLowerCase()
-					);
-				} else {
-					const searchName = name.trim().toLowerCase();
-					foundCert = certificates.find(cert => {
-						const fullName = `${cert.surname} ${cert.name} ${cert.patronymic}`.toLowerCase();
-						return fullName === searchName;
+		e.preventDefault();
+		setIsSubmitted(true);
+		setIsLoading(true);
+		setVerificationResult(null);
+		setCertificateData(null);
+	
+		try {
+			const response = await axios.get("http://81.19.135.141/data/certificates.json");
+			const certificates = response.data;
+	
+			// Искусственная задержка для UX
+			await new Promise(resolve => setTimeout(resolve, 800));
+	
+			// Проверка пустых полей
+			if ((activeTab === 'number' && !certificate.trim()) || 
+					(activeTab === 'name' && !name.trim())) {
+				setVerificationResult('empty');
+				return;
+			}
+	
+			// Функция для нормализации строк сравнения
+			const normalizeString = (str) => {
+				return str
+					.toLowerCase()
+					.replace(/\s+/g, ' ')     // заменяем множественные пробелы на один
+					.replace(/\s$/, '')       // удаляем пробел в конце
+					.replace(/^\s/, '')       // удаляем пробел в начале
+					.trim();
+			};
+	
+			let foundCert = null;
+	
+			if (activeTab === 'number') {
+				// Поиск по номеру сертификата
+				const searchCode = normalizeString(certificate);
+				foundCert = certificates.find(cert => 
+					normalizeString(cert.code) === searchCode
+				);
+			} else {
+				// Поиск по ФИО
+				const searchName = normalizeString(name);
+				
+				foundCert = certificates.find(cert => {
+					// Собираем полное имя из компонентов
+					const dbFullName = `${cert.surname} ${cert.name} ${cert.patronymic}`;
+					const normalizedDbName = normalizeString(dbFullName);
+					
+					console.log('Comparing:', {
+						input: searchName,
+						fromDB: normalizedDbName,
+						match: normalizedDbName === searchName
 					});
-				}
-        
-        if (foundCert) {
-          setCertificateData({
-            fullName: `${foundCert.surname} ${foundCert.name} ${foundCert.patronymic}`,
-            code: foundCert.code,
-            date: foundCert.date,
-            qualification: foundCert.qualification
-          });
-          setVerificationResult('valid');
-        } else {
-          setVerificationResult('invalid');
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching certificates:", error);
-      setVerificationResult('error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+					
+					return normalizedDbName === searchName;
+				});
+			}
+	
+			if (foundCert) {
+				setCertificateData({
+					fullName: `${foundCert.surname} ${foundCert.name} ${foundCert.patronymic}`,
+					code: foundCert.code,
+					date: foundCert.date,
+					qualification: foundCert.qualification
+				});
+				setVerificationResult('valid');
+			} else {
+				setVerificationResult('invalid');
+				console.log('Search failed. Available certificates:', certificates);
+			}
+		} catch (error) {
+			console.error("Error fetching certificates:", error);
+			setVerificationResult('error');
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
   const getResultMessage = () => {
     switch (verificationResult) {
