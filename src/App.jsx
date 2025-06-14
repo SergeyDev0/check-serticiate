@@ -5,7 +5,8 @@ import "./styles/index.scss";
 
 const App = () => {
   const [certificate, setCertificate] = useState('');
-  const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
+	const [firstName, setFirstName] = useState('');
   const [verificationResult, setVerificationResult] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,71 +17,60 @@ const App = () => {
 		e.preventDefault();
 		setIsSubmitted(true);
 		setIsLoading(true);
-		setVerificationResult(null);
-		setCertificateData(null);
 	
 		try {
 			const response = await axios.get("http://81.19.135.141/data/certificates.json");
 			const certificates = response.data;
 	
-			// Искусственная задержка для UX
 			await new Promise(resolve => setTimeout(resolve, 800));
 	
-			// Проверка пустых полей
-			if ((activeTab === 'number' && !certificate.trim()) || 
-					(activeTab === 'name' && !name.trim())) {
-				setVerificationResult('empty');
-				return;
-			}
-	
-			// Функция для нормализации строк сравнения
-			const normalizeString = (str) => {
-				return str
-					.toLowerCase()
-					.replace(/\s+/g, ' ')     // заменяем множественные пробелы на один
-					.replace(/\s$/, '')       // удаляем пробел в конце
-					.replace(/^\s/, '')       // удаляем пробел в начале
-					.trim();
-			};
-	
-			let foundCert = null;
-	
 			if (activeTab === 'number') {
-				// Поиск по номеру сертификата
-				const searchCode = normalizeString(certificate);
-				foundCert = certificates.find(cert => 
-					normalizeString(cert.code) === searchCode
-				);
-			} else {
-				// Поиск по ФИО
-				const searchName = normalizeString(name);
+				if (!certificate.trim()) {
+					setVerificationResult('empty');
+					return;
+				}
 				
-				foundCert = certificates.find(cert => {
-					// Собираем полное имя из компонентов
-					const dbFullName = `${cert.surname} ${cert.name} ${cert.patronymic}`;
-					const normalizedDbName = normalizeString(dbFullName);
-					
-					console.log('Comparing:', {
-						input: searchName,
-						fromDB: normalizedDbName,
-						match: normalizedDbName === searchName
+				const foundCert = certificates.find(cert => 
+					cert.code.toLowerCase().trim() === certificate.toLowerCase().trim()
+				);
+				
+				if (foundCert) {
+					setCertificateData({
+						fullName: `${foundCert.surname} ${foundCert.name}`,
+						code: foundCert.code,
+						date: foundCert.date,
+						qualification: foundCert.qualification
 					});
-					
-					return normalizedDbName === searchName;
-				});
-			}
-	
-			if (foundCert) {
-				setCertificateData({
-					fullName: `${foundCert.surname} ${foundCert.name} ${foundCert.patronymic}`,
-					code: foundCert.code,
-					date: foundCert.date,
-					qualification: foundCert.qualification
-				});
-				setVerificationResult('valid');
+					setVerificationResult('valid');
+				} else {
+					setVerificationResult('invalid');
+				}
 			} else {
-				setVerificationResult('invalid');
-				console.log('Search failed. Available certificates:', certificates);
+				if (!surname.trim() || !firstName.trim()) {
+					setVerificationResult('empty');
+					return;
+				}
+	
+				const foundCert = certificates.find(cert => {
+					const dbSurname = cert.surname.toLowerCase().trim();
+					const dbName = cert.name.toLowerCase().trim();
+					const inputSurname = surname.toLowerCase().trim();
+					const inputName = firstName.toLowerCase().trim();
+					
+					return dbSurname === inputSurname && dbName === inputName;
+				});
+	
+				if (foundCert) {
+					setCertificateData({
+						fullName: `${foundCert.surname} ${foundCert.name}`,
+						code: foundCert.code,
+						date: foundCert.date,
+						qualification: foundCert.qualification
+					});
+					setVerificationResult('valid');
+				} else {
+					setVerificationResult('invalid');
+				}
 			}
 		} catch (error) {
 			console.error("Error fetching certificates:", error);
@@ -106,12 +96,13 @@ const App = () => {
   };
 
   const resetForm = () => {
-    setCertificate('');
-    setName('');
-    setVerificationResult(null);
-    setIsSubmitted(false);
-    setCertificateData(null);
-  };
+		setCertificate('');
+		setSurname('');
+		setFirstName('');
+		setVerificationResult(null);
+		setIsSubmitted(false);
+		setCertificateData(null);
+	};
 
   return (
     <div className="certificate-page">
@@ -152,55 +143,70 @@ const App = () => {
               </div>
               
               <form onSubmit={handleSubmit} className="certificate-form">
-                {activeTab === 'number' ? (
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      id="certificate"
-                      value={certificate}
-                      onChange={(e) => setCertificate(e.target.value)}
-                      placeholder="Enter certificate code"
-                      className={isSubmitted ? 'submitted' : ''}
-                      autoComplete="off"
-                      spellCheck="false"
-                    />
-                    <label htmlFor="certificate">Certificate Number</label>
-                    <div className="underline"></div>
-                  </div>
-                ) : (
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter surname or full name"
-                      className={isSubmitted ? 'submitted' : ''}
-                      autoComplete="off"
-                      spellCheck="false"
-                    />
-                    <label htmlFor="name">Full Name</label>
-                    <div className="underline"></div>
-                  </div>
-                )}
-                
-                <motion.button 
-                  type="submit" 
-                  className={`verify-button ${isLoading ? 'loading' : ''}`}
-                  disabled={isLoading}
-                  whileTap={{ scale: 0.98 }}
-                  whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}
-                >
-                  {isLoading ? (
-                    <>
-                      <span className="spinner"></span>
-                      <span className="btn-text">Verifying...</span>
-                    </>
-                  ) : (
-                    <span className="btn-text">Verify Certificate</span>
-                  )}
-                </motion.button>
-              </form>
+								{activeTab === 'number' ? (
+									<div className="form-group">
+										<input
+											type="text"
+											id="certificate"
+											value={certificate}
+											onChange={(e) => setCertificate(e.target.value)}
+											placeholder="Enter certificate code"
+											className={isSubmitted ? 'submitted' : ''}
+											autoComplete="off"
+											spellCheck="false"
+										/>
+										<label htmlFor="certificate">Certificate Number</label>
+										<div className="underline"></div>
+									</div>
+								) : (
+									<div className="col">
+										<div className="form-group">
+											<input
+												type="text"
+												id="firstName"
+												value={firstName}
+												onChange={(e) => setFirstName(e.target.value)}
+												placeholder="Enter forename"
+												className={isSubmitted ? 'submitted' : ''}
+												autoComplete="off"
+												spellCheck="false"
+											/>
+											<label htmlFor="firstName">Forename</label>
+											<div className="underline"></div>
+										</div>
+										<div className="form-group">
+											<input
+												type="text"
+												id="surname"
+												value={surname}
+												onChange={(e) => setSurname(e.target.value)}
+												placeholder="Enter surname"
+												className={isSubmitted ? 'submitted' : ''}
+												autoComplete="off"
+												spellCheck="false"
+											/>
+											<label htmlFor="surname">Surname</label>
+											<div className="underline"></div>
+										</div>
+									</div>
+								)}
+								
+								<motion.button 
+									type="submit" 
+									className={`verify-button ${isLoading ? 'loading' : ''}`}
+									disabled={isLoading}
+									whileTap={{ scale: 0.98 }}
+								>
+									{isLoading ? (
+										<>
+											<span className="spinner"></span>
+											<span className="btn-text">Verifying...</span>
+										</>
+									) : (
+										<span className="btn-text">Verify Certificate</span>
+									)}
+								</motion.button>
+							</form>
 
               <AnimatePresence>
                 {isSubmitted && !isLoading && (
