@@ -15,7 +15,7 @@ const App = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.get("http://81.19.135.141/certificates.json");
+      const response = await axios.get("http://81.19.135.141/data/certificates.json");
       const certificates = response.data;
       setCertificatesList(certificates);
 
